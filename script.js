@@ -1,5 +1,7 @@
+import {urlApi} from './chaveUrl.js'
+
 async function getPopularMovies(){
-  const url = 'https://api.themoviedb.org/3/trending/movie/day?api_key=1f3c42f43d42a611bc72187b35ae8d71';
+  const url = urlApi;
   const fetchApi = await fetch(url);
   const movieData = await fetchApi.json();
 

@@ -1,4 +1,4 @@
-import {apiKey} from './dev/chaveUrl.js'
+import {apiKey} from './chaveUrl.js'
 
 const input = document.querySelector('input');
 const buttonBusca = document.querySelector('.search__button');

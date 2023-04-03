@@ -85,9 +85,15 @@
 .corujao__conteudo__filme__info div span {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 .corujao__conteudo__filme__descricao p{
   line-height: 1.8;
   color: #9999A3;
+}
+.filme__favorito {
+  cursor: pointer;
+}
+.filme__favorito.favoritado {
+
 }

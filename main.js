@@ -1,3 +1,4 @@
+'use strict'
 import {apiKey} from './chaveUrl.js'
 
 const input = document.querySelector('input');
@@ -58,25 +59,72 @@ async function searchMovieByName(title) {
   }
 }
 
+function favorited(event, movie) {
+  const favoriteState = {
+    favorited: 'public/img/heart-full.svg',
+    notFavorited: 'public/img/heart-empty.svg'
+  }
+  if (event.target.src.includes(favoriteState.notFavorited)) {
+    event.target.src = favoriteState.favorited
+    saveToLocalStorage(movie)
+  } else {
+    event.target.src = favoriteState.notFavorited
+    removeFromLocalStorage(movie.id)
+  }
+}
+
+function getFavoriteMovies() {
+  return JSON.parse(localStorage.getItem('favoriteMovies'));
+}
+
+function saveToLocalStorage(movie) {
+  const movies = getFavoriteMovies() || []
+  movies.push(movie)
+  const moviesJSON = JSON.stringify(movies)
+  localStorage.setItem('favoriteMovies', moviesJSON)
+}
+
+function checkMovieIsFavorited(id) {
+  const movies = getFavoriteMovies() || []
+  return movies.find(movie => movie.id == id);
+}
+
+function removeFromLocalStorage(id) {
+  const movies = getFavoriteMovies() || []
+  const findMovie = movies.find(movie => movie.id == id)
+  const newMovies = movies.filter(movie => movie.id != findMovie.id)
+  localStorage.setItem('favoriteMovies', JSON.stringify(newMovies))
+}
+
 async function renderMovie(movie) {
+  const {id, title, poster_path, vote_average, release_date, overview} = movie
+  const isFavorited = checkMovieIsFavorited(id)
+
   const filmeElemento = document.createElement('div');
-  filmeElemento.innerHTML = `<div class="corujao__conteudo__filme">
-  <div class="corujao__conteudo__filme__img"><img src="https://image.tmdb.org/t/p/w780${movie.poster_path}" alt="Filme"></div>
+
+  filmeElemento.innerHTML = `<div class="corujao__conteudo__filme" id="${id}">
+  <div class="corujao__conteudo__filme__img"><img src="https://image.tmdb.org/t/p/w780${poster_path}" alt="${title}"></div>
   <div class="corujao__conteudo__filme__info">
-    <h2 class="corujao__conteudo__filme__name">${movie.original_title} <span class="filme__year">(${movie.release_date.substr(0,4)})</span></h2>
+    <h2 class="corujao__conteudo__filme__name">${title} <span class="filme__year">(${release_date.substr(0,4)})</span></h2>
     <div>
-      <span class="filme__rating"><img src="public/img/Star.svg" alt="Avaliação Filme"> ${movie.vote_average.toFixed(1)}</span>
-      <span><img src="public/img/heart-empty.svg" alt="Favorito">Favoritar</span>
+      <span class="filme__rating"><img src="public/img/Star.svg" alt="Avaliação Filme"> ${vote_average.toFixed(1)}</span>
+      <span class="filme__favorito"><img src="${isFavorited ? 'public/img/heart-full.svg' : 'public/img/heart-empty.svg'}" alt="Favorito"><p>Favoritar</p></span>
     </div>
   </div>
   <div class="corujao__conteudo__filme__descricao">
-    <p class="filme__descricao">${movie.overview}</p>
+    <p class="filme__descricao">${overview}</p>
   </div>
   </div>`;
   document.querySelector('.corujao__conteudo').appendChild(filmeElemento);
+  
+}
+
+async function getAllPopularMovies() {
+  const movies = await getPopularMovies();
+  movies.forEach((movie) => renderMovie(movie));
+
 }
 
 window.onload = async function() {
-  const movies = await getPopularMovies()
-  movies.forEach(movie => renderMovie(movie))
+  getAllPopularMovies()
 }

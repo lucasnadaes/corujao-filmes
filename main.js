@@ -64,10 +64,13 @@ function favorited(event, movie) {
     favorited: 'public/img/heart-full.svg',
     notFavorited: 'public/img/heart-empty.svg'
   }
-  if (event.target.src.includes(favoriteState.notFavorited)) {
+
+  if(event.target.src.includes(favoriteState.notFavorited)) {
+    // aqui ele será favoritado
     event.target.src = favoriteState.favorited
     saveToLocalStorage(movie)
   } else {
+    // aqui ele será desfavoritado
     event.target.src = favoriteState.notFavorited
     removeFromLocalStorage(movie.id)
   }
@@ -96,19 +99,28 @@ function removeFromLocalStorage(id) {
   localStorage.setItem('favoriteMovies', JSON.stringify(newMovies))
 }
 
-async function renderMovie(movie) {
+async function getAllPopularMovies() {
+  const movies = await getPopularMovies();
+  movies.forEach((movie) => renderMovie(movie));
+}
+
+window.onload = function() {
+  getAllPopularMovies()
+}
+
+function renderMovie(movie) {
   const {id, title, poster_path, vote_average, release_date, overview} = movie
   const isFavorited = checkMovieIsFavorited(id)
 
   const filmeElemento = document.createElement('div');
 
   filmeElemento.innerHTML = `<div class="corujao__conteudo__filme" id="${id}">
-  <div class="corujao__conteudo__filme__img"><img src="https://image.tmdb.org/t/p/w780${poster_path}" alt="${title}"></div>
+  <div class="corujao__conteudo__filme__img"><img src="https://image.tmdb.org/t/p/w500${poster_path}" alt="${title}"></div>
   <div class="corujao__conteudo__filme__info">
     <h2 class="corujao__conteudo__filme__name">${title} <span class="filme__year">(${release_date.substr(0,4)})</span></h2>
-    <div>
+    <div class="corujao__conteudo__filme__info__favorito">
       <span class="filme__rating"><img src="public/img/Star.svg" alt="Avaliação Filme"> ${vote_average.toFixed(1)}</span>
-      <span class="filme__favorito"><img src="${isFavorited ? 'public/img/heart-full.svg' : 'public/img/heart-empty.svg'}" alt="Favorito"><p>Favoritar</p></span>
+      <span class="filme__favorito"><img src="public/img/heart-empty.svg" alt="Favoritar">Favoritar</span>
     </div>
   </div>
   <div class="corujao__conteudo__filme__descricao">
@@ -116,15 +128,8 @@ async function renderMovie(movie) {
   </div>
   </div>`;
   document.querySelector('.corujao__conteudo').appendChild(filmeElemento);
-  
-}
 
-async function getAllPopularMovies() {
-  const movies = await getPopularMovies();
-  movies.forEach((movie) => renderMovie(movie));
-
-}
-
-window.onload = async function() {
-  getAllPopularMovies()
+  const filmeFavorito = document.querySelector('.filme__favorito img')
+  filmeFavorito.src = isFavorited ? 'public/img/heart-full.svg' : 'public/img/heart-empty.svg';
+  filmeFavorito.addEventListener('click', (event) => favorited(event, movie))
 }
